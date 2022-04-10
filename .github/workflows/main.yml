@@ -1,0 +1,57 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ master, dev ]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up environment (node.js & npm)
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16.x'
+          cache: 'yarn'
+      - name: Install packages
+        run: yarn install
+      - name: Build project
+#         env:
+#           NODE_ENV: development
+#           CI: false
+        run: yarn build
+      - name: Prepare artifact
+        run: |
+          cd dist
+          zip -qq -r web.zip .
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: web
+          path: dist/web.zip
+
+  deploy_production:
+    name: Deploy to production server
+    if: contains( github.ref, 'master' )
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: web
+      - name: Extract files from archive
+        run: |
+          unzip -qq web.zip
+          rm web.zip
+#       - name: Deploy to production server
+#         uses: up9cloud/action-rsync@v1.3
+#         env:
+#           USER: 
+#           HOST: 
+#           PORT: 
+#           KEY: ${{ secrets.DEPLOY_KEY }}
+#           TARGET: 
+  
