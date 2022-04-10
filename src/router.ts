@@ -5,10 +5,10 @@ import {
 	RouteLocationNormalized,
 	RouteRecordRaw
 } from 'vue-router'
-import Releases from './views/Overview.vue'
-import ReleaseEdit from './views/ReleaseEdit.vue'
 import Artists from './views/Artists.vue'
 import Login from './views/Login.vue'
+import Releases from './views/Overview.vue'
+import ReleaseEdit from './views/ReleaseEdit.vue'
 import {
   authenticate,
   canBeAuthenticated,
@@ -32,13 +32,6 @@ const router = createRouter({
       },
       component: Login
     },
-		{
-			path: '/',
-			meta: {
-				allow: 'guest'
-			},
-			component: Releases
-		},
 		{
 			path: '/releases',
 			component: Releases
@@ -86,13 +79,9 @@ const router = createRouter({
 				}
 			},
 		} as any) as RouteRecordRaw,
-		{
+    {
 			path: '/:pathMatch(.*)*',
-			name: 'not-found',
-			meta: {
-				allow: 'all'
-			},
-			component: Releases
+			redirect: '/releases'
 		},
 	]
 });
@@ -106,7 +95,7 @@ const navigate = ({ meta: { allow } }: RouteLocationNormalized, next: Navigation
 		if (allow === 'guest') {  // only for unauthenticated users
 			logged ? next('/releases') : next();
 		} else { // only for authenticated users
-			logged ? next() : next('/');
+			logged ? next() : next('/enter');
 		}
 	}
 
